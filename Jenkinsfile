@@ -15,7 +15,7 @@ pipeline{
 
     options{
         timestamps()
-        timeout(time: 1, Unit: 'HOURS')
+        timeout(time: 1, unit: 'HOURS')
     }
 
     stages{
@@ -54,7 +54,7 @@ pipeline{
             }
         }
 
-        stage('Docker Image'){
+        stage('Docker Image for Master'){
              when{
                 branch 'master'
             }
@@ -64,7 +64,7 @@ pipeline{
             }
         }
 
-        stage('Docker Image'){
+        stage('Docker Image for Develop'){
             when{
                 branch 'develop'
             }    

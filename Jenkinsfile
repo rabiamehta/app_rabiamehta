@@ -60,7 +60,7 @@ pipeline{
             }
             steps{
                echo 'Creation and Tagging of docker image for master branch'
-               withDockerRegistry([credentialsId: 'DockerHub']){
+               withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
                bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest ."
                }
             }

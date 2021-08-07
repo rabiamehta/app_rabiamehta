@@ -11,6 +11,9 @@ pipeline{
 	    SONAR_PROJECT_KEY = 'sonar-rabiamehta'
         USERNAME = 'rabiamehta'
         DOCKER_REPOSITORY_NAME = 'rabiamehta'
+        DOCKER_MASTER_PORT = 7200
+        DOCKER_DEVELOP_PORT = 7300
+        APP_PORT = 8080
     }
 
     options{
@@ -79,19 +82,31 @@ pipeline{
                  steps{
                    echo "Pushing docker image to Docker Hub"
                    script{
-                   withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
-                       if(env.BRANCH_NAME == 'develop'){
-                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER}"
-                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest"
-                       }else{
-                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER}"
-                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest"
-                       }
-                   }
+                    withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
+                        if(env.BRANCH_NAME == 'develop'){
+                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER}"
+                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest"
+                        }else{
+                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER}"
+                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest"
+                        }
+                    }
                    }
                  }
                }
            }
+        }
+
+        stage('Docker Deployment'){
+            steps{
+                script{
+                    if(env.BRANCH_NAME == 'develop'){
+                        bat "docker run --name c-${USERNAME}-${env.BRANCH_NAME} -d -p ${DOCKER_DEVELOP_PORT}:${APP_PORT} ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop" 
+                    }else{
+                        bat "docker run --name c-${USERNAME}-${env.BRANCH_NAME} -d -p ${DOCKER_MASTER_PORT}:${APP_PORT} ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}" 
+                    }
+                }
+            }
         }
     }
 }

@@ -61,7 +61,6 @@ pipeline{
             steps{
                echo 'Creation and Tagging of docker image for master branch'
                bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest ."
-           
             }
         }
 
@@ -73,6 +72,24 @@ pipeline{
                 echo 'Creation and Tagging of docker image for develop branch'
                 bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest ."
             }
+        }
+
+        stage('Containers'){
+           parallel{
+               stage('PreContainerCheck'){
+                   echo "container check in parallel"
+               }
+               stage('PublishToDockerHub'){
+                   echo "Pushing docker image to Docker Hub"
+                   withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
+                       if(env.BRANCH_NAME == 'develop'){
+                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER}"
+                       }else{
+                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER}"
+                       }
+                   }
+               }
+           }
         }
     }
 }

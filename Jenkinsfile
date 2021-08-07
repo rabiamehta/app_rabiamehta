@@ -78,7 +78,8 @@ pipeline{
                      echo "container check "
                      script{
                          if(env.BRANCH_NAME == 'master'){
-                             "docker ps -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-master"
+                            containerCheck = "docker ps -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-master"
+                            echo containerCheck
                             // if(bat "docker ps -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-master"){
                             //     "docker stop c-${DOCKER_REPOSITORY_NAME}-master"
                             //     "docker rm c-${DOCKER_REPOSITORY_NAME}-master"

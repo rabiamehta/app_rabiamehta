@@ -46,7 +46,7 @@ public class WelcomeControllerTest {
     // Get request with Param
     @Test
     public void hello() throws Exception {
-        mockMvc.perform(get("/hello").param("name", "Rabia"))
+        mockMvc.perform(get("/home").param("name", "Rabia"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("welcome"))
                 .andExpect(model().attribute("message", equalTo("Rabia")))

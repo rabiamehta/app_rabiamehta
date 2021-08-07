@@ -55,6 +55,7 @@ pipeline{
         }
 
         stage('Docker Image'){
+          steps{
             script{
                 if(env.BRANCH_NAME == 'master'){
                     echo 'Creation and Tagging of docker image for master branch'
@@ -64,6 +65,7 @@ pipeline{
                     bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest ."
                 }
             }
+          }
         }
         
         stage('Containers'){

@@ -26,7 +26,7 @@ public class WelcomeController {
     }
 
     // /hello?name=rabia
-    @GetMapping("/hello")
+    @GetMapping("/home")
     public String mainWithParam(
             @RequestParam(name = "name", required = false, defaultValue = "") String name, Model model) {
 

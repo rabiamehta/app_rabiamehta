@@ -54,26 +54,18 @@ pipeline{
             }
         }
 
-        stage('Docker Image for Master'){
-             when{
-                branch 'master'
-            }
-            steps{
-               echo 'Creation and Tagging of docker image for master branch'
-               bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest ."
-            }
-        }
-
-        stage('Docker Image for Develop'){
-            when{
-                branch 'develop'
-            }    
-            steps{
-                echo 'Creation and Tagging of docker image for develop branch'
-                bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest ."
+        stage('Docker Image'){
+            script{
+                if(env.BRANCH_NAME == 'master'){
+                    echo 'Creation and Tagging of docker image for master branch'
+                    bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest ."
+                }else{
+                    echo 'Creation and Tagging of docker image for develop branch'
+                    bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest ."
+                }
             }
         }
-
+        
         stage('Containers'){
            parallel{
                stage('PreContainerCheck'){
@@ -88,8 +80,10 @@ pipeline{
                    withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
                        if(env.BRANCH_NAME == 'develop'){
                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER}"
+                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest"
                        }else{
                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER}"
+                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest"
                        }
                    }
                    }

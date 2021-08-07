@@ -77,9 +77,12 @@ pipeline{
         stage('Containers'){
            parallel{
                stage('PreContainerCheck'){
-                   echo "container check in parallel"
+                   steps{
+                     echo "container check in parallel"
+                   }
                }
                stage('PublishToDockerHub'){
+                 steps{
                    echo "Pushing docker image to Docker Hub"
                    withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
                        if(env.BRANCH_NAME == 'develop'){
@@ -88,6 +91,7 @@ pipeline{
                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER}"
                        }
                    }
+                 }
                }
            }
         }

@@ -84,12 +84,14 @@ pipeline{
                stage('PublishToDockerHub'){
                  steps{
                    echo "Pushing docker image to Docker Hub"
+                   script{
                    withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
                        if(env.BRANCH_NAME == 'develop'){
                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER}"
                        }else{
                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER}"
                        }
+                   }
                    }
                  }
                }

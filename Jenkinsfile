@@ -113,13 +113,15 @@ pipeline{
         stage('K8s Deployment'){
             steps{
                 script{
-                    deploymentStatus = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines().drop(1).join(" ")}"
-                         
+                    deploymentStatus = "${bat (script: "kubectl get deploy/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta", returnStdout: true).trim().readLines().drop(1).join(" ")}"
+                    echo deploymentStatus
                     if(K8_UPDATE_DEPLOYMENT == true){
                         bat 'kubectl rollout restart deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
                     }else{
                         bat 'kubectl apply -f k8s/'
                     }
+
+
                 }
             }
         }

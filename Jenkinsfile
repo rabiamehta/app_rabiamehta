@@ -73,7 +73,7 @@ pipeline{
                      script{
                          containerIdCheck = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines().drop(1).join(" ")}"
                          echo containerIdCheck
-                         if(containerIdCheck != null){
+                         if(containerIdCheck != ''){
                             echo "Stopping and removing already running container !"
                             K8_UPDATE_DEPLOYMENT = true
                             bat "docker stop c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}"
@@ -113,6 +113,8 @@ pipeline{
         stage('K8s Deployment'){
             steps{
                 script{
+                    deploymentStatus = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines().drop(1).join(" ")}"
+                         
                     if(K8_UPDATE_DEPLOYMENT == true){
                         bat 'kubectl rollout restart deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
                     }else{

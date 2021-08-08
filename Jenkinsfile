@@ -128,7 +128,7 @@ pipeline{
     }
 
     post { 
-        always { 
+        success { 
             echo 'Pipeline exited successfuly !'
         }
     }

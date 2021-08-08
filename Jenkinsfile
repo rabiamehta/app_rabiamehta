@@ -77,16 +77,7 @@ pipeline{
                    steps{
                      echo "container check "
                      script{
-                         if(env.BRANCH_NAME == 'master'){
-                            containerCheck = "docker ps -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-master"
-                            echo containerCheck
-                            // if(bat "docker ps -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-master"){
-                            //     "docker stop c-${DOCKER_REPOSITORY_NAME}-master"
-                            //     "docker rm c-${DOCKER_REPOSITORY_NAME}-master"
-                            // }
-                         }else{
-                            echo "develop"
-                         }
+                         containerIdCheck = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines.drop(1).join(" ")}"
                      }
                    }
                }
@@ -113,11 +104,17 @@ pipeline{
             steps{
                 script{
                     if(env.BRANCH_NAME == 'develop'){
-                        bat "docker run --name c-${USERNAME}-${env.BRANCH_NAME} -d -p ${DOCKER_DEVELOP_PORT}:${APP_PORT} ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop" 
+                        bat "docker run --name c-${USERNAME}-${env.BRANCH_NAME} -d -p ${DOCKER_DEVELOP_PORT}:${APP_PORT} ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}" 
                     }else{
                         bat "docker run --name c-${USERNAME}-${env.BRANCH_NAME} -d -p ${DOCKER_MASTER_PORT}:${APP_PORT} ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}" 
                     }
                 }
+            }
+        }
+
+        stage('K8s Deployment'){
+            steps{
+                bat 'kubectl apply -f k8s/'
             }
         }
     }

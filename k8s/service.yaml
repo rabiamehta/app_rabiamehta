@@ -1,0 +1,17 @@
+   apiVersion: v1
+   kind: Service
+   metadata:
+      labels:
+        app: nagp
+      name: nagp-welcome-devops-svc
+      namespace: kubernetes-cluster-rabiamehta
+   spec:
+      selector:
+        app: nagp
+      ports:
+      -  name: nagp-svc-port
+         nodePort: 30157
+         port: 8080
+         targetPort: 8080
+      type: NodePort
+   

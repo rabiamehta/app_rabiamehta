@@ -25,8 +25,15 @@ public class WelcomeController {
         return "welcome"; //view
     }
 
-    // /hello?name=rabia
     @GetMapping("/home")
+    public String main(Model model) {
+        model.addAttribute("message", message);
+        model.addAttribute("tasks", tasks);
+        return "welcome"; //view
+    }
+
+    // /hello?name=rabia
+    @GetMapping("/hello")
     public String mainWithParam(
             @RequestParam(name = "name", required = false, defaultValue = "") String name, Model model) {
 

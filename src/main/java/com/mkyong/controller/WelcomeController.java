@@ -25,6 +25,13 @@ public class WelcomeController {
         return "welcome"; //view
     }
 
+    @GetMapping("/home")
+    public String home(Model model) {
+        model.addAttribute("message", message);
+        model.addAttribute("tasks", tasks);
+        return "welcome"; //view
+    }
+
     // /hello?name=rabia
     @GetMapping("/hello")
     public String mainWithParam(

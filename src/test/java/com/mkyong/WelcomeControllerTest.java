@@ -34,9 +34,9 @@ public class WelcomeControllerTest {
         ResultActions resultActions = mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("welcome"))
-                .andExpect(model().attribute("message", equalTo("NAGP Aspirants")))
+                .andExpect(model().attribute("message", equalTo("Rabia Mehta")))
                 .andExpect(model().attribute("tasks", is(expectedList)))
-                .andExpect(content().string(containsString("Hello, NAGP Aspirants")));
+                .andExpect(content().string(containsString("Hello, Rabia Mehta")));
 
         MvcResult mvcResult = resultActions.andReturn();
         ModelAndView mv = mvcResult.getModelAndView();
@@ -46,11 +46,11 @@ public class WelcomeControllerTest {
     // Get request with Param
     @Test
     public void hello() throws Exception {
-        mockMvc.perform(get("/hello").param("name", "Rabia"))
+        mockMvc.perform(get("/home").param("name", "Rabia Mehta"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("welcome"))
-                .andExpect(model().attribute("message", equalTo("Rabia")))
-                .andExpect(content().string(containsString("Hello, Rabia")));
+                .andExpect(model().attribute("message", equalTo("Rabia Mehta")))
+                .andExpect(content().string(containsString("Hello, Rabia Mehta")));
     }
 
 

@@ -118,7 +118,7 @@ pipeline{
                     }else{
                         bat 'kubectl apply -f k8s/'
                         bat 'kubectl wait --for=condition=available deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
-                    }
+                    }       
                 }
             }
         }

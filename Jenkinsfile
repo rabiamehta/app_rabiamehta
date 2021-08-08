@@ -11,6 +11,9 @@ pipeline{
 	    SONAR_PROJECT_KEY = 'sonar-rabiamehta'
         USERNAME = 'rabiamehta'
         DOCKER_REPOSITORY_NAME = 'rabiamehta'
+        DOCKER_MASTER_PORT = 7200
+        DOCKER_DEVELOP_PORT = 7300
+        APP_PORT = 8080
     }
 
     options{
@@ -54,42 +57,76 @@ pipeline{
             }
         }
 
-        stage('Docker Image for Master'){
-             when{
-                branch 'master'
-            }
-            steps{
-               echo 'Creation and Tagging of docker image for master branch'
-               bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:latest ."
+        stage('Docker Image'){
+          steps{
+                    echo 'Creation and Tagging of docker image'
+                    bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}:latest ."
             }
         }
-
-        stage('Docker Image for Develop'){
-            when{
-                branch 'develop'
-            }    
-            steps{
-                echo 'Creation and Tagging of docker image for develop branch'
-                bat "docker build -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER} -t ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:latest ."
-            }
-        }
-
+        
         stage('Containers'){
            parallel{
                stage('PreContainerCheck'){
-                   echo "container check in parallel"
-               }
-               stage('PublishToDockerHub'){
-                   echo "Pushing docker image to Docker Hub"
-                   withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
-                       if(env.BRANCH_NAME == 'develop'){
-                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-develop:${BUILD_NUMBER}"
-                       }else{
-                           bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-master:${BUILD_NUMBER}"
-                       }
+                   steps{
+                     echo "Checking if port is already in use by the container !"
+                     script{
+                         containerIdCheck = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines().drop(1).join(" ")}"
+                         echo containerIdCheck
+                         if(containerIdCheck != ''){
+                            echo "Stopping and removing already running container !"
+                            bat "docker stop c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}"
+                            bat "docker rm c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}"
+                         }else{
+                             echo "No existing running container found !"
+                         }
+                     }
                    }
                }
+               stage('PublishToDockerHub'){
+                 steps{
+                   echo "Pushing docker image to Docker Hub"
+                   script{
+                    withDockerRegistry([credentialsId: 'DockerHub', url: ""]){
+                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}:${BUILD_NUMBER}"
+                            bat "docker push ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}:latest"
+                    }
+                   }
+                 }
+               }
            }
+        }
+
+        stage('Docker Deployment'){
+            steps{
+                script{
+                    if(env.BRANCH_NAME == 'develop'){
+                        bat "docker run --name c-${USERNAME}-${env.BRANCH_NAME} -d -p ${DOCKER_DEVELOP_PORT}:${APP_PORT} ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}" 
+                    }else{
+                        bat "docker run --name c-${USERNAME}-${env.BRANCH_NAME} -d -p ${DOCKER_MASTER_PORT}:${APP_PORT} ${DOCKER_REPOSITORY_NAME}/i-${USERNAME}-${env.BRANCH_NAME}" 
+                    }
+                }
+            }
+        }
+
+        stage('K8s Deployment'){
+            steps{
+                script{
+                    deploymentStatus = "${bat (script: "kubectl get deploy/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta", returnStdout: true)}"
+                    if(deploymentStatus.contains('nagp-welcome-devops-deployment')){
+                        bat 'kubectl rollout restart deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
+                        bat 'kubectl rollout status -w deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
+                    }else{
+                        bat 'kubectl apply -f k8s/'
+                        bat 'kubectl wait --for=condition=available deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
+                    }       
+                }
+            }
+        }
+    }
+
+    post { 
+        always { 
+            echo 'Pipeline exited successfuly !'
         }
     }
 }

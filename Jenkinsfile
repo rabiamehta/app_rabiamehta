@@ -115,7 +115,7 @@ pipeline{
             }
             steps{
                 script{
-                    deploymentStatus = "${bat (script: "kubectl get deploy/${DEPLOYMENT_NAME}-${env.BRANCH_NAME} -n ${NS}", returnStdout: true)}"
+                    deploymentStatus = "${bat (script: "kubectl get deploy -n ${NS}", returnStdout: true)}"
                     if(deploymentStatus.contains(DEPLOYMENT_NAME+'-'+env.BRANCH_NAME)){
                         bat "kubectl rollout restart deployment/${DEPLOYMENT_NAME}-${env.BRANCH_NAME} -n ${NS}"
                         bat "kubectl rollout status -w deployment/${DEPLOYMENT_NAME}-${env.BRANCH_NAME} -n ${NS}"

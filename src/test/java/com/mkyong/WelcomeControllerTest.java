@@ -34,9 +34,9 @@ public class WelcomeControllerTest {
         ResultActions resultActions = mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("welcome"))
-                .andExpect(model().attribute("message", equalTo("NAGP Aspirants")))
+                .andExpect(model().attribute("message", equalTo("Rabia Mehta")))
                 .andExpect(model().attribute("tasks", is(expectedList)))
-                .andExpect(content().string(containsString("Hello, NAGP Aspirants")));
+                .andExpect(content().string(containsString("Hello, Rabia Mehta")));
 
         MvcResult mvcResult = resultActions.andReturn();
         ModelAndView mv = mvcResult.getModelAndView();

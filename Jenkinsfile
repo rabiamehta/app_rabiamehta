@@ -109,16 +109,19 @@ pipeline{
         }
 
         stage('K8s Deployment'){
+            environment{
+                DEPLOYMENT_NAME = 'nagp-welcome-devops-deployment'
+                NS = 'kubernetes-cluster-rabiamehta'
+            }
             steps{
                 script{
-                    deploymentStatus = "${bat (script: "kubectl get deploy/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta", returnStdout: true)}"
-                    if(deploymentStatus.contains('nagp-welcome-devops-deployment')){
-                        bat 'kubectl rollout restart deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
-                        bat 'kubectl rollout status -w deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
+                    deploymentStatus = "${bat (script: "kubectl get deploy -n ${NS}", returnStdout: true)}"
+                    if(deploymentStatus.contains(DEPLOYMENT_NAME+'-'+env.BRANCH_NAME)){
+                        bat "kubectl rollout restart deployment/${DEPLOYMENT_NAME}-${env.BRANCH_NAME} -n ${NS}"
                     }else{
                         bat 'kubectl apply -f k8s/'
-                        bat 'kubectl wait --for=condition=available deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
                     }       
+                    bat "kubectl rollout status -w deployment/${DEPLOYMENT_NAME}-${env.BRANCH_NAME} -n ${NS}"
                 }
             }
         }

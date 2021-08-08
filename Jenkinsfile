@@ -14,7 +14,6 @@ pipeline{
         DOCKER_MASTER_PORT = 7200
         DOCKER_DEVELOP_PORT = 7300
         APP_PORT = 8080
-        K8_UPDATE_DEPLOYMENT = false
     }
 
     options{
@@ -75,7 +74,6 @@ pipeline{
                          echo containerIdCheck
                          if(containerIdCheck != ''){
                             echo "Stopping and removing already running container !"
-                            K8_UPDATE_DEPLOYMENT = true
                             bat "docker stop c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}"
                             bat "docker rm c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}"
                          }else{
@@ -115,16 +113,12 @@ pipeline{
                 script{
                     deploymentStatus = "${bat (script: "kubectl get deploy/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta", returnStdout: true)}"
                     if(deploymentStatus.contains('nagp-welcome-devops-deployment')){
-                        echo "yes"
-                    }else{
-                        echo "no"
-                    }
-                    if(K8_UPDATE_DEPLOYMENT == true){
                         bat 'kubectl rollout restart deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
                     }else{
-                        bat 'kubectl apply -f k8s/'
+                         bat 'kubectl apply -f k8s/'
                     }
 
+                    bat 'kubectl wait --for=condition=available deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
 
                 }
             }

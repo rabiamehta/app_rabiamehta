@@ -114,14 +114,19 @@ pipeline{
                     deploymentStatus = "${bat (script: "kubectl get deploy/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta", returnStdout: true)}"
                     if(deploymentStatus.contains('nagp-welcome-devops-deployment')){
                         bat 'kubectl rollout restart deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
+                        bat 'kubectl rollout status -w deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
                     }else{
-                         bat 'kubectl apply -f k8s/'
+                        bat 'kubectl apply -f k8s/'
+                        bat 'kubectl wait --for=condition=available deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
                     }
-
-                    bat 'kubectl wait --for=condition=available deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
-
                 }
             }
+        }
+    }
+
+    post { 
+        always { 
+            echo 'Pipeline exited successfuly !'
         }
     }
 }

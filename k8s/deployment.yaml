@@ -1,15 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nagp-welcome-devops-deployment
+  name: nagp-welcome-devops-deployment-master
   namespace: kubernetes-cluster-rabiamehta
   labels:
     app: nagp
+    branch: master
 spec:
   replicas: 4
   selector:
     matchLabels:
       app: nagp
+      branch: master
   strategy: 
     rollingUpdate:
       maxSurge: 2
@@ -19,9 +21,10 @@ spec:
     metadata:
       labels:
         app: nagp
+        branch: master
     spec:
       containers:
-      - name: nagp-welcome-devops-app
+      - name: nagp-welcome-devops-app-master
         image: rabiamehta/i-rabiamehta-master
         resources:
           limits:

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nagp-welcome-devops-deployment-develop
+  namespace: kubernetes-cluster-rabiamehta
+  labels:
+    app: nagp
+    branch: develop
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nagp
+      branch: develop
+  strategy: 
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nagp
+        branch: develop
+    spec:
+      containers:
+      - name: nagp-welcome-devops-app-develop
+        image: rabiamehta/i-rabiamehta-develop
+        resources:
+          limits:
+            cpu: 0.2
+            memory: "200Mi"
+          requests:
+            cpu: 0.1
+            memory: "100Mi"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080

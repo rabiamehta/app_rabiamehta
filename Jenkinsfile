@@ -113,8 +113,12 @@ pipeline{
         stage('K8s Deployment'){
             steps{
                 script{
-                    deploymentStatus = "${bat (script: "kubectl get deploy/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta", returnStdout: true).trim().readLines().drop(1).join(" ")}"
-                    echo deploymentStatus
+                    deploymentStatus = "${bat (script: "kubectl get deploy/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta", returnStdout: true)}"
+                    if(deploymentStatus.contains('nagp-welcome-devops-deployment')){
+                        echo "yes"
+                    }else{
+                        echo "no"
+                    }
                     if(K8_UPDATE_DEPLOYMENT == true){
                         bat 'kubectl rollout restart deployment/nagp-welcome-devops-deployment -n kubernetes-cluster-rabiamehta'
                     }else{

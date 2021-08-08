@@ -79,6 +79,10 @@ pipeline{
                      script{
                          containerIdCheck = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines().drop(1).join(" ")}"
                          echo containerIdCheck
+                         if(containerIdCheck != null){
+                            bat "docker stop c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}"
+                            bat "docker rm c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}"
+                         }
                      }
                    }
                }

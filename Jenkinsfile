@@ -72,14 +72,15 @@ pipeline{
         }
         
         stage('Containers'){
+         steps{
            parallel{
                stage('PreContainerCheck'){
-                   steps{
-                     echo "container check "
+                    
                      script{
+                          echo "container check "
                          containerIdCheck = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines().drop(1).join(" ")}"
                     }
-                   }
+                   
                     when{
                        expression{
                           return containerIdCheck!=null
@@ -107,6 +108,7 @@ pipeline{
             //      }
             //    }
            }
+         }
         }
 
         // stage('Docker Deployment'){

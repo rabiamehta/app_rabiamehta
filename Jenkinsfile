@@ -76,9 +76,9 @@ pipeline{
                stage('PreContainerCheck'){
                    steps{
                      echo "container check "
-                     script{
-                         containerIdCheck = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines.drop(1).join(" ")}"
-                     }
+                    //  script{
+                    //      containerIdCheck = "${bat (script: "docker ps -a -q -f status=running -f name=c-${DOCKER_REPOSITORY_NAME}-${env.BRANCH_NAME}", returnStdout: true).trim().readLines.drop(1).join(" ")}"
+                    //  }
                    }
                }
                stage('PublishToDockerHub'){
